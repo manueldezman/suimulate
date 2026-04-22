@@ -269,12 +269,15 @@ Rules: 4-6 steps, single emoji icons, realistic SUI values, objects need name/su
 
   const res = await fetch(
     `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
-    { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }], generationConfig: { temperature: 0.3, maxOutputTokens: 1500 } }) }
+    { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }], generationConfig: { temperature: 0.3, maxOutputTokens: 8192 } }) }
   );
   if (!res.ok) { const e = await res.json().catch(() => ({})); throw new Error(e?.error?.message || `Gemini error (${res.status})`); }
   const data = await res.json();
-  const text = data.candidates?.[0]?.content?.parts?.[0]?.text || "";
-  return JSON.parse(text.replace(/```json|```/g, "").trim());
+  const raw = data.candidates?.[0]?.content?.parts?.[0]?.text || "";
+const jsonMatch = raw.match(/\{[\s\S]*\}/);
+if (!jsonMatch) throw new Error("Gemini returned no valid JSON. Try again.");
+return JSON.parse(jsonMatch[0]);
+
 }
 
 // ─── REGEX PARSER ────────────────────────────────────────────────────────────
