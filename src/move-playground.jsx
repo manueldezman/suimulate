@@ -834,45 +834,76 @@ function ExplanationPanel({ sim, template, isComplete, currentStep }) {
 
 // ─── CODE EDITOR ─────────────────────────────────────────────────────────────
 
-function CodeEditor({ code, onChange, templateColor, onRun, isRunning, parseErrors, aiMode }) {
+function CodeEditor({ code = "", onChange, templateColor, onRun, isRunning, parseErrors = [], aiMode }) {
   const [isFocused, setIsFocused] = useState(false);
+  const highlightRef = useRef(null);
+
+  // Synchronizes the background div's scroll with the textarea
+  const handleScroll = (e) => {
+    if (highlightRef.current) {
+      highlightRef.current.scrollTop = e.target.scrollTop;
+      highlightRef.current.scrollLeft = e.target.scrollLeft;
+    }
+  };
+
+  const safeHighlight = (text) => {
+    return typeof highlight === 'function' ? highlight(text) : text;
+  };
+
   return (
-    <div style={{ display:"flex",flexDirection:"column",height:"100%",gap:"8px",minHeight:0 }}>
-      <div style={{ display:"flex",alignItems:"center",gap:"8px",flexShrink:0 }}>
-        <div style={{ display:"flex",gap:"5px" }}>
-          {["#F87171","#FBBF24","#34D399"].map((c)=><div key={c} style={{ width:"9px",height:"9px",borderRadius:"50%",background:c,opacity:0.7 }} />)}
+    <div style={{ display:"flex", flexDirection:"column", height:"100%", gap:"8px", minHeight:0 }}>
+      {/* Header */}
+      <div style={{ display:"flex", alignItems:"center", gap:"8px", flexShrink:0 }}>
+        <div style={{ display:"flex", gap:"5px" }}>
+          {["#F87171","#FBBF24","#34D399"].map((c)=><div key={c} style={{ width:"9px", height:"9px", borderRadius:"50%", background:c, opacity:0.7 }} />)}
         </div>
-        <span style={{ color:"#475569",fontSize:"10px",fontFamily:"monospace",flex:1 }}>main.move</span>
-        <div style={{ color:"#64748B",fontSize:"9px",background:"#1E293B",padding:"2px 6px",borderRadius:"4px" }}>Move</div>
+        <span style={{ color:"#475569", fontSize:"10px", fontFamily:"monospace", flex:1 }}>main.move</span>
+        <div style={{ color:"#64748B", fontSize:"9px", background:"#1E293B", padding:"2px 6px", borderRadius:"4px" }}>Move</div>
       </div>
 
-      {/* Scrollable editor area */}
-      <div style={{ flex:1,position:"relative",background:"rgba(7,13,26,0.8)",border:`1px solid ${isFocused?templateColor+"40":"#1E293B"}`,borderRadius:"10px",overflow:"hidden",transition:"border-color 0.3s ease",minHeight:0 }}>
-        <div style={{ position:"absolute",inset:0,padding:"14px",fontFamily:"'JetBrains Mono','Fira Code','Courier New',monospace",fontSize:"11px",lineHeight:"18px",color:"#E2E8F0",whiteSpace:"pre",overflow:"auto",pointerEvents:"none",zIndex:1 }} dangerouslySetInnerHTML={{ __html: highlight(code) }} />
-        <textarea value={code} onChange={(e)=>onChange(e.target.value)} onFocus={()=>setIsFocused(true)} onBlur={()=>setIsFocused(false)} spellCheck={false}
-          style={{ position:"absolute",inset:0,width:"100%",height:"100%",padding:"14px",fontFamily:"'JetBrains Mono','Fira Code','Courier New',monospace",fontSize:"11px",lineHeight:"18px",color:"transparent",caretColor:templateColor,background:"transparent",border:"none",outline:"none",resize:"none",zIndex:2,whiteSpace:"pre",overflow:"auto" }} />
+      {/* Editor Container */}
+      <div style={{ flex:1, position:"relative", background:"rgba(7,13,26,0.8)", border:`1px solid ${isFocused ? templateColor + "40" : "#1E293B"}`, borderRadius:"10px", overflow:"hidden", transition:"border-color 0.3s ease", minHeight:0 }}>
+        
+        {/* 1. Highlight Layer: pointerEvents="none" makes it "ghost-like" so you can click through it */}
+        <div 
+          ref={highlightRef} 
+          style={{ position:"absolute", inset:0, padding:"14px", fontFamily:"'JetBrains Mono', monospace", fontSize:"11px", lineHeight:"18px", color:"#E2E8F0", whiteSpace:"pre", overflow:"hidden", pointerEvents:"none", zIndex:1 }} 
+          dangerouslySetInnerHTML={{ __html: safeHighlight(code) }} 
+        />
+
+        {/* 2. Textarea Layer: Higher zIndex and overflow="auto" makes the scrollbar visible and draggable */}
+        <textarea 
+          value={code} 
+          onChange={(e) => onChange(e.target.value)} 
+          onFocus={() => setIsFocused(true)} 
+          onBlur={() => setIsFocused(false)} 
+          onScroll={handleScroll}
+          spellCheck={false}
+          style={{ position:"absolute", inset:0, width:"100%", height:"100%", padding:"14px", fontFamily:"'JetBrains Mono', monospace", fontSize:"11px", lineHeight:"18px", color:"transparent", caretColor:templateColor, background:"transparent", border:"none", outline:"none", resize:"none", zIndex:2, whiteSpace:"pre", overflow:"auto" }} 
+        />
       </div>
 
-      {/* Errors */}
-      <div style={{ flexShrink:0,display:"flex",flexDirection:"column",gap:"4px" }}>
-        {parseErrors.map((e,i)=>(
-          <div key={i} style={{ padding:"7px 10px",borderRadius:"7px",fontSize:"11px",background:e.type==="error"?"rgba(248,113,113,0.1)":"rgba(251,191,36,0.1)",border:`1px solid ${e.type==="error"?"#F8717140":"#FBBF2440"}`,color:e.type==="error"?"#F87171":"#FCD34D",lineHeight:1.4 }}>
-            {e.type==="error"?"✕ ":"⚠ "}{e.msg}
+      {/* Footer / Errors */}
+      <div style={{ flexShrink:0, display:"flex", flexDirection:"column", gap:"4px" }}>
+        {parseErrors.map((e, i) => (
+          <div key={i} style={{ padding:"7px 10px", borderRadius:"7px", fontSize:"11px", background:e.type==="error"?"rgba(248,113,113,0.1)":"rgba(251,191,36,0.1)", border:`1px solid ${e.type==="error"?"#F8717140":"#FBBF2440"}`, color:e.type==="error"?"#F87171":"#FCD34D", lineHeight:1.4 }}>
+            {e.type === "error" ? "✕ " : "⚠ "}{e.msg}
           </div>
         ))}
         {aiMode && (
-          <div style={{ padding:"6px 10px",borderRadius:"7px",fontSize:"10px",background:"rgba(99,102,241,0.1)",border:"1px solid #6366F140",color:"#818CF8",display:"flex",alignItems:"center",gap:"6px" }}>
+          <div style={{ padding:"6px 10px", borderRadius:"7px", fontSize:"10px", background:"rgba(99,102,241,0.1)", border:"1px solid #6366F140", color:"#818CF8", display:"flex", alignItems:"center", gap:"6px" }}>
             ✦ Simulated by Gemini Flash 2.5
           </div>
         )}
       </div>
 
-      <button onClick={onRun} disabled={isRunning} style={{ flexShrink:0,display:"flex",alignItems:"center",justifyContent:"center",gap:"8px",padding:"10px 16px",background:isRunning?`${templateColor}40`:templateColor,color:"#0F172A",borderRadius:"8px",border:"none",cursor:isRunning?"not-allowed":"pointer",fontWeight:800,fontSize:"12px",letterSpacing:"0.06em",textTransform:"uppercase",transition:"all 0.3s ease",boxShadow:isRunning?"none":`0 4px 20px ${templateColor}50` }}>
-        {isRunning?<><div style={{ width:"12px",height:"12px",border:"2px solid #0F172A40",borderTopColor:"#0F172A",borderRadius:"50%",animation:"spin 0.6s linear infinite" }} />Simulating...</>:<><PlayIcon />Run Simulation</>}
+      <button onClick={onRun} disabled={isRunning} style={{ flexShrink:0, padding:"10px 16px", background:isRunning ? `${templateColor}40` : templateColor, color:"#0F172A", borderRadius:"8px", border:"none", cursor:isRunning ? "not-allowed" : "pointer", fontWeight:800, fontSize:"12px", textTransform:"uppercase", transition:"all 0.3s ease", boxShadow:isRunning ? "none" : `0 4px 20px ${templateColor}50` }}>
+        {isRunning ? "Simulating..." : "Run Simulation"}
       </button>
     </div>
   );
 }
+
 
 // ─── HELPERS ─────────────────────────────────────────────────────────────────
 
