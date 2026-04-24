@@ -952,7 +952,7 @@ export default function Suimulate() {
   const activeSim = dynamicSim || template.simulation;
   const totalSteps = activeSim.steps.length;
 
-  useEffect(() => { setMounted(true); const t = setTimeout(()=>runSimulation(), 1200); return ()=>clearTimeout(t); }, []);
+  useEffect(() => { setMounted(true); }, []);
 
   const clearAutoPlay = () => { if (autoPlayRef.current){clearInterval(autoPlayRef.current);autoPlayRef.current=null;} setIsAutoPlaying(false); };
 
