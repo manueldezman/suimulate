@@ -1019,46 +1019,59 @@ export default function Suimulate() {
         ::-webkit-scrollbar{width:4px;height:4px;}
         ::-webkit-scrollbar-track{background:transparent;}
         ::-webkit-scrollbar-thumb{background:#1E293B;border-radius:2px;}
+        @media (max-width: 768px) {
+          .main-grid {
+            grid-template-columns: 1fr !important;
+            grid-template-rows: auto auto auto !important;
+            overflow-y: auto !important;
+          }
+          .panel-left { min-height: 400px; border-right: none !important; border-bottom: 1px solid #0F172A; }
+          .panel-center { min-height: 400px; }
+          .panel-right { min-height: 400px; border-left: none !important; border-top: 1px solid #0F172A; }
+          }  
+        }
       `}</style>
 
       {showKeyPanel && <GeminiKeyPanel geminiKey={geminiKey} onSave={setGeminiKey} onClose={()=>setShowKeyPanel(false)} />}
 
       {/* HEADER */}
-      <header style={{ padding:"14px 20px",borderBottom:"1px solid #0F172A",display:"flex",alignItems:"center",gap:"12px",background:"rgba(7,13,26,0.96)",backdropFilter:"blur(12px)",position:"sticky",top:0,zIndex:100,flexWrap:"wrap" }}>
-        {/* Logo */}
-        <div style={{ display:"flex",alignItems:"center",gap:"10px",flexShrink:0 }}>
-          <div style={{ width:"32px",height:"32px",background:`linear-gradient(135deg, ${template.color}, ${template.color}80)`,borderRadius:"8px",display:"flex",alignItems:"center",justifyContent:"center",fontSize:"16px",boxShadow:`0 0 16px ${template.color}40`,transition:"all 0.4s ease" }}>◈</div>
-          <div>
-            <div style={{ fontWeight:900,fontSize:"16px",letterSpacing:"-0.04em",color:"#F1F5F9" }}>Suimulate</div>
-            <div style={{ color:"#475569",fontSize:"9px",letterSpacing:"0.08em",textTransform:"uppercase" }}>Move Visualizer · Sui Blockchain</div>
+      <header style={{ padding:"10px 12px",borderBottom:"1px solid #0F172A",display:"flex",alignItems:"center",gap:"12px",background:"rgba(7,13,26,0.96)",backdropFilter:"blur(12px)",position:"sticky",top:0,zIndex:100, }}>
+        <div className="row-1">
+          {/* Logo */}
+          <div style={{ display:"flex",alignItems:"center",gap:"10px",flexShrink:0 }}>
+            <div style={{ width:"32px",height:"32px",background:`linear-gradient(135deg, ${template.color}, ${template.color}80)`,borderRadius:"8px",display:"flex",alignItems:"center",justifyContent:"center",fontSize:"16px",boxShadow:`0 0 16px ${template.color}40`,transition:"all 0.4s ease" }}>◈</div>
+            <div>
+              <div style={{ fontWeight:900,fontSize:"16px",letterSpacing:"-0.04em",color:"#F1F5F9" }}>Suimulate</div>
+              <div style={{ color:"#475569",fontSize:"9px",letterSpacing:"0.08em",textTransform:"uppercase" }}>Move Visualizer · Sui Blockchain</div>
+            </div>
+          </div>
+           {/* Gemini key */}
+          <button onClick={()=>setShowKeyPanel(true)} style={{ display:"flex",alignItems:"center",gap:"6px",padding:"5px 11px",borderRadius:"20px",background:geminiKey?"rgba(99,102,241,0.15)":"transparent",border:`1px solid ${geminiKey?"#6366F160":"#1E293B"}`,color:geminiKey?"#818CF8":"#64748B",fontSize:"11px",fontWeight:600,cursor:"pointer",whiteSpace:"nowrap",flexShrink:0 }}>
+            {geminiKey?"✦ AI On":"✦ Add Gemini Key"}
+          </button>
+          {/* Speed */}
+          <div style={{ display:"flex",alignItems:"center",gap:"5px",flexShrink:0 }}>
+            <span style={{ color:"#475569",fontSize:"10px" }}>Speed</span>
+            <div style={{ display:"flex",background:"#0F172A",border:"1px solid #1E293B",borderRadius:"6px",overflow:"hidden" }}>
+              {[0.5,1,2].map((s)=>(
+                <button key={s} onClick={()=>setSpeed(s)} style={{ padding:"3px 7px",background:speed===s?"#1E293B":"transparent",color:speed===s?"#E2E8F0":"#475569",fontSize:"10px",fontWeight:700,border:"none",cursor:"pointer" }}>{s}×</button>
+              ))}
+            </div>
           </div>
         </div>
 
-        <div style={{ flex:1 }} />
-
-        {/* Templates */}
-        <div style={{ display:"flex",gap:"5px",flexWrap:"wrap" }}>
-          {Object.values(TEMPLATES).map((t)=>(
-            <button key={t.id} onClick={()=>selectTemplate(t.id)} style={{ padding:"5px 11px",borderRadius:"20px",background:selectedTemplate===t.id?`${t.color}20`:"transparent",border:`1px solid ${selectedTemplate===t.id?t.color+"60":"#1E293B"}`,color:selectedTemplate===t.id?t.color:"#64748B",fontSize:"11px",fontWeight:selectedTemplate===t.id?700:500,cursor:"pointer",transition:"all 0.2s ease",whiteSpace:"nowrap" }}>
-              {t.icon} {t.label}
-            </button>
-          ))}
-        </div>
-
-        {/* Gemini key */}
-        <button onClick={()=>setShowKeyPanel(true)} style={{ display:"flex",alignItems:"center",gap:"6px",padding:"5px 11px",borderRadius:"20px",background:geminiKey?"rgba(99,102,241,0.15)":"transparent",border:`1px solid ${geminiKey?"#6366F160":"#1E293B"}`,color:geminiKey?"#818CF8":"#64748B",fontSize:"11px",fontWeight:600,cursor:"pointer",whiteSpace:"nowrap",flexShrink:0 }}>
-          {geminiKey?"✦ AI On":"✦ Add Gemini Key"}
-        </button>
-
-        {/* Speed */}
-        <div style={{ display:"flex",alignItems:"center",gap:"5px",flexShrink:0 }}>
-          <span style={{ color:"#475569",fontSize:"10px" }}>Speed</span>
-          <div style={{ display:"flex",background:"#0F172A",border:"1px solid #1E293B",borderRadius:"6px",overflow:"hidden" }}>
-            {[0.5,1,2].map((s)=>(
-              <button key={s} onClick={()=>setSpeed(s)} style={{ padding:"3px 7px",background:speed===s?"#1E293B":"transparent",color:speed===s?"#E2E8F0":"#475569",fontSize:"10px",fontWeight:700,border:"none",cursor:"pointer" }}>{s}×</button>
+        <div className="row-2">
+          {/* Templates */}
+          <div style={{ display:"flex",gap:"5px", overflowX: "auto", whiteSpace: "nowrap", width: "100%", paddingBotton: "4px", }}>
+            {Object.values(TEMPLATES).map((t)=>(
+              <button key={t.id} onClick={()=>selectTemplate(t.id)} style={{ padding:"5px 11px",borderRadius:"20px",background:selectedTemplate===t.id?`${t.color}20`:"transparent",border:`1px solid ${selectedTemplate===t.id?t.color+"60":"#1E293B"}`,color:selectedTemplate===t.id?t.color:"#64748B",fontSize:"11px",fontWeight:selectedTemplate===t.id?700:500,cursor:"pointer",transition:"all 0.2s ease",whiteSpace:"nowrap" }}>
+                {t.icon} {t.label}
+              </button>
             ))}
           </div>
         </div>
+
+       
       </header>
 
       {/* HERO */}
@@ -1073,10 +1086,11 @@ export default function Suimulate() {
       </div>
 
       {/* MAIN GRID — responsive columns */}
-      <div style={{
+      <div className="main-grid" style={{
         flex:1,
         display:"grid",
         gridTemplateColumns:"minmax(280px, 320px) 1fr minmax(280px, 360px)",
+        gridTemplateRows:"1fr",
         gap:"1px",
         background:"#0F172A",
         margin:"0 12px 12px",
@@ -1087,12 +1101,12 @@ export default function Suimulate() {
       }}>
 
         {/* LEFT: Code editor — scrollable */}
-        <div style={{ background:"#070D1A",padding:"14px",display:"flex",flexDirection:"column",borderRight:"1px solid #0F172A",overflow:"hidden",minHeight:0 }}>
+        <div className="panel-left" style={{ background:"#070D1A",padding:"14px",display:"flex",flexDirection:"column",borderRight:"1px solid #0F172A",overflow:"hidden",minHeight:0 }}>
           <CodeEditor code={code} onChange={setCode} templateColor={template.color} onRun={runSimulation} isRunning={isRunning} parseErrors={parseErrors} aiMode={aiMode} />
         </div>
 
         {/* CENTER: Visualization */}
-        <div style={{ background:"#070D1A",display:"flex",flexDirection:"column",minHeight:0 }}>
+        <div className="panel-center" style={{ background:"#070D1A",display:"flex",flexDirection:"column",minHeight:0 }}>
           <div style={{ flex:1,position:"relative",overflow:"hidden" }}>
             <VisualizationCanvas template={template} sim={activeSim} currentStep={currentStep} isComplete={isComplete} />
           </div>
@@ -1113,7 +1127,7 @@ export default function Suimulate() {
         </div>
 
         {/* RIGHT: State + Timeline + Explanation — scrollable, grows with width */}
-        <div style={{ background:"#070D1A",borderLeft:"1px solid #0F172A",display:"flex",flexDirection:"column",overflow:"hidden",minHeight:0 }}>
+        <div className="panel-right" style={{ background:"#070D1A",borderLeft:"1px solid #0F172A",display:"flex",flexDirection:"column",overflow:"hidden",minHeight:0 }}>
           <div style={{ flex:1,overflowY:"auto",padding:"14px",display:"flex",flexDirection:"column",gap:"16px" }}>
             <Section label="Object State" color={template.color}>
               <StatePanel sim={activeSim} template={template} currentStep={currentStep} isComplete={isComplete} />
