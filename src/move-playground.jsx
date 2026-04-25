@@ -1113,10 +1113,10 @@ export default function Suimulate() {
 
       {/* HERO */}
       <div style={{ padding:"16px 20px 12px",textAlign:"center",flexShrink:0 }}>
-        <h1 style={{ fontSize:"26px",fontWeight:900,letterSpacing:"-0.04em",background:`linear-gradient(135deg, #F1F5F9 40%, ${template.color})`,WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent",marginBottom:"5px",transition:"all 0.5s ease" }}>
+        <h1 style={{ fontSize:"26px",fontWeight:900,letterSpacing:"-0.04em",backgroundImage:`linear-gradient(135deg, #F1F5F9 40%, ${template.color})`,WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent",marginBottom:"5px",transition:"all 0.5s ease" }}>
           Understand Move by Seeing It
         </h1>
-        <p style={{ color:"#64748B",fontSize:"12px" }}>
+        <p style={{ color:"#64748B",fontSize:"12px", marginTop: "10px" }}>
           Visualize how Sui transactions and objects behave in real time
           {!geminiKey && <span onClick={()=>setShowKeyPanel(true)} style={{ color:"#6366F1",marginLeft:"8px",cursor:"pointer",textDecoration:"underline dotted" }}>+ Add Gemini key for AI simulation</span>}
         </p>
