@@ -106,70 +106,6 @@ Suimulate is a single-page React application built around a monolithic component
 5. User runs simulation and watches animated visualization
 6. State updates reflect changes to wallets and objects
 
-### Styling Approach
-
-- **Inline styles** for dynamic values (template colors, computed dimensions)
-- **CSS classes** for structural components and responsive behavior
-- **CSS variables** for theming (light/dark mode support)
-- **Media queries** for responsive breakpoints (480px, 768px, 1024px)
-
-## Example Usage
-
-### Transfer SUI
-
-```move
-module suimulate::transfer {
-  use sui::coin::{Self, Coin};
-  use sui::sui::SUI;
-  use sui::transfer;
-
-  public entry fun transfer_sui(
-    mut coin: Coin<SUI>,
-    ctx: &mut TxContext
-  ) {
-    let amount: u64 = 5;
-    let payment = coin::split(&mut coin, amount, ctx);
-    transfer::public_transfer(payment, @bob);
-    transfer::public_transfer(coin, tx_context::sender(ctx));
-  }
-}
-```
-
-Run the simulation to see:
-1. Function called by Alice
-2. Coin object loaded from object store
-3. Coin split creating new payment object
-4. Transfer executed (5 SUI moves to Bob)
-5. State committed atomically
-
-### Mint NFT
-
-```move
-module suimulate::nft {
-  use std::string::{Self, String};
-  use sui::object::{Self, UID};
-  use sui::transfer;
-  use sui::tx_context::{Self, TxContext};
-
-  struct ArtNFT has key, store {
-    id: UID,
-    name: String,
-    edition: u64,
-    creator: address,
-  }
-
-  public entry fun mint_nft(ctx: &mut TxContext) {
-    let nft = ArtNFT {
-      id: object::new(ctx),
-      name: std::string::utf8(b"Genesis #1"),
-      edition: 1,
-      creator: tx_context::sender(ctx),
-    };
-    transfer::public_transfer(nft, tx_context::sender(ctx));
-  }
-}
-```
-
 ## Testing Instructions
 
 ```bash
@@ -185,18 +121,6 @@ npm run dev
 # - Write custom Move function
 # - Run simulation and verify AI-generated steps
 ```
-
-## Environment Variables
-
-| Variable | Description | Default | Required |
-|-----------|-------------|---------|----------|
-| `GEMINI_API_KEY` | Google Gemini API key for AI simulation | - | No (optional for AI features) |
-| `ANTHROPIC_BASE_URL` | Anthropic API base URL | `http://localhost:4000` | No |
-| `ANTHROPIC_API_KEY` | Anthropic API key | `DUMMY_KEY` | No |
-| `ANTHROPIC_AUTH_TOKEN` | Anthropic auth token | `DUMMY_TOKEN` | No |
-| `ANTHROPIC_MODEL` | Anthropic model to use | `claude-3-8-opus-20251001` | No |
-| `NVIDIA_NIM_API_KEY` | NVIDIA NIM API key | - | No |
-| `ENABLE_THINKING` | Enable provider reasoning requests | `true` | No |
 
 ## License
 
