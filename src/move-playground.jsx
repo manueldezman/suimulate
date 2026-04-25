@@ -443,7 +443,7 @@ function GeminiKeyPanel({ geminiKey, onSave, onClose }) {
   return (
     <div style={{ position:"fixed",inset:0,zIndex:200,background:"rgba(7,13,26,0.88)",backdropFilter:"blur(10px)",display:"flex",alignItems:"center",justifyContent:"center" }}
       onClick={(e) => e.target===e.currentTarget && onClose()}>
-      <div style={{ background:"#0F172A",border:"1px solid #1E293B",borderRadius:"16px",padding:"28px",width:"420px",display:"flex",flexDirection:"column",gap:"16px",boxShadow:"0 24px 64px rgba(0,0,0,0.6)",animation:"fadeIn 0.2s ease" }}>
+      <div className="gemini-key-panel" style={{ background:"#0F172A",border:"1px solid #1E293B",borderRadius:"16px",padding:"28px",width:"420px",maxWidth:"90%",display:"flex",flexDirection:"column",gap:"16px",boxShadow:"0 24px 64px rgba(0,0,0,0.6)",animation:"fadeIn 0.2s ease" }}>
         <div>
           <div style={{ fontWeight:800,fontSize:"16px",color:"#F1F5F9",marginBottom:"6px" }}>✦ Enable AI Simulation</div>
           <div style={{ color:"#64748B",fontSize:"12px",lineHeight:1.6 }}>Add your free Gemini Flash 2.5 key to simulate <strong style={{color:"#94A3B8"}}>any</strong> custom Move function — not just built-in templates.</div>
@@ -479,8 +479,9 @@ function VisualizationCanvas({ template, sim, currentStep, isComplete }) {
 
 // shared canvas wrapper
 function CanvasWrap({ template, children, activeStep }) {
+  const isMobile = typeof window !== 'undefined' && window.innerWidth < 480;
   return (
-    <div style={{ position:"relative",width:"100%",height:"100%",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:"20px" }}>
+    <div className="viz-container" style={{ position:"relative",width:"100%",height:"100%",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:"20px",transform:isMobile?"scale(0.8)":"scale(1)",transformOrigin:"center" }}>
       <div style={{ position:"absolute",inset:0,backgroundImage:"radial-gradient(circle, #1E293B 1px, transparent 1px)",backgroundSize:"28px 28px",opacity:0.35 }} />
       <div style={{ position:"absolute",width:"300px",height:"300px",borderRadius:"50%",background:`radial-gradient(circle, ${template.color}15 0%, transparent 70%)`,top:"50%",left:"50%",transform:"translate(-50%, -50%)" }} />
       {children}
@@ -758,9 +759,10 @@ function Timeline({ steps, currentStep, templateColor, onStepClick }) {
 
 function StatePanel({ sim, template, currentStep, isComplete }) {
   const showAfter = isComplete || currentStep >= sim.steps.length;
+  const isMobile = typeof window !== 'undefined' && window.innerWidth < 480;
   return (
     <div style={{ display:"flex",flexDirection:"column",gap:"10px" }}>
-      <div style={{ display:"grid",gridTemplateColumns:"1fr 1fr",gap:"8px" }}>
+      <div className="state-panel-grid" style={{ display:"grid",gridTemplateColumns:isMobile?"1fr":"1fr 1fr",gap:"8px" }}>
         {["Before","After"].map((label) => {
           const sd = label==="Before" ? sim.initialState : sim.finalState;
           const isAfter = label==="After";
@@ -840,6 +842,7 @@ function ExplanationPanel({ sim, template, isComplete, currentStep }) {
 function CodeEditor({ code = "", onChange, templateColor, onRun, isRunning, parseErrors = [], aiMode }) {
   const [isFocused, setIsFocused] = useState(false);
   const highlightRef = useRef(null);
+  const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
 
   // Synchronizes the background div's scroll with the textarea
   const handleScroll = (e) => {
@@ -865,24 +868,24 @@ function CodeEditor({ code = "", onChange, templateColor, onRun, isRunning, pars
       </div>
 
       {/* Editor Container */}
-      <div style={{ flex:1, position:"relative", background:"rgba(7,13,26,0.8)", border:`1px solid ${isFocused ? templateColor + "40" : "#1E293B"}`, borderRadius:"10px", overflow:"hidden", transition:"border-color 0.3s ease", minHeight:0 }}>
+      <div style={{ flex:1, position:"relative", background:"rgba(7,13,26,0.8)", border:`1px solid ${isFocused ? templateColor + "40" : "#1E293B"}`, borderRadius:"10px", overflow:"hidden", transition:"border-color 0.3s ease", minHeight: isMobile ? "200px" : 0 }}>
         
         {/* 1. Highlight Layer: pointerEvents="none" makes it "ghost-like" so you can click through it */}
-        <div 
-          ref={highlightRef} 
-          style={{ position:"absolute", inset:0, padding:"14px", fontFamily:"'JetBrains Mono', monospace", fontSize:"11px", lineHeight:"18px", color:"#E2E8F0", whiteSpace:"pre", overflow:"hidden", pointerEvents:"none", zIndex:1 }} 
-          dangerouslySetInnerHTML={{ __html: safeHighlight(code) }} 
+        <div
+          ref={highlightRef}
+          style={{ position:"absolute", inset:0, padding:isMobile?"8px":"14px", fontFamily:"'JetBrains Mono', monospace", fontSize:isMobile?"10px":"11px", lineHeight:isMobile?"16px":"18px", color:"#E2E8F0", whiteSpace:"pre", overflow:"hidden", pointerEvents:"none", zIndex:1 }}
+          dangerouslySetInnerHTML={{ __html: safeHighlight(code) }}
         />
 
         {/* 2. Textarea Layer: Higher zIndex and overflow="auto" makes the scrollbar visible and draggable */}
-        <textarea 
-          value={code} 
-          onChange={(e) => onChange(e.target.value)} 
-          onFocus={() => setIsFocused(true)} 
-          onBlur={() => setIsFocused(false)} 
+        <textarea
+          value={code}
+          onChange={(e) => onChange(e.target.value)}
+          onFocus={() => setIsFocused(true)}
+          onBlur={() => setIsFocused(false)}
           onScroll={handleScroll}
           spellCheck={false}
-          style={{ position:"absolute", inset:0, width:"100%", height:"100%", padding:"14px", fontFamily:"'JetBrains Mono', monospace", fontSize:"11px", lineHeight:"18px", color:"transparent", caretColor:templateColor, background:"transparent", border:"none", outline:"none", resize:"none", zIndex:2, whiteSpace:"pre", overflow:"auto" }} 
+          style={{ position:"absolute", inset:0, width:"100%", height:"100%", padding:isMobile?"8px":"14px", fontFamily:"'JetBrains Mono', monospace", fontSize:isMobile?"10px":"11px", lineHeight:isMobile?"16px":"18px", color:"transparent", caretColor:templateColor, background:"transparent", border:"none", outline:"none", resize:"none", zIndex:2, whiteSpace:"pre", overflow:"auto" }}
         />
       </div>
 
@@ -911,9 +914,10 @@ function CodeEditor({ code = "", onChange, templateColor, onRun, isRunning, pars
 // ─── HELPERS ─────────────────────────────────────────────────────────────────
 
 function Section({ label, color, children }) {
+  const isMobile = typeof window !== 'undefined' && window.innerWidth < 480;
   return (
     <div>
-      <div style={{ color:"#475569",fontSize:"9px",fontWeight:700,letterSpacing:"0.12em",textTransform:"uppercase",marginBottom:"8px",display:"flex",alignItems:"center",gap:"6px" }}>
+      <div className="section-label" style={{ color:"#475569",fontSize:isMobile?"11px":"9px",fontWeight:700,letterSpacing:"0.12em",textTransform:"uppercase",marginBottom:"8px",display:"flex",alignItems:"center",gap:"6px" }}>
         <div style={{ width:"3px",height:"3px",borderRadius:"50%",background:color,flexShrink:0 }} />{label}
       </div>
       {children}
@@ -922,8 +926,9 @@ function Section({ label, color, children }) {
 }
 
 function ControlBtn({ onClick, disabled, children, title, active }) {
+  const isMobile = typeof window !== 'undefined' && window.innerWidth < 480;
   return (
-    <button onClick={onClick} disabled={disabled} title={title} style={{ width:"30px",height:"30px",display:"flex",alignItems:"center",justifyContent:"center",background:active?"#1E293B":"transparent",border:"1px solid #1E293B",borderRadius:"6px",color:disabled?"#1E293B":"#64748B",cursor:disabled?"not-allowed":"pointer",transition:"all 0.2s ease" }}
+    <button className="control-btn" onClick={onClick} disabled={disabled} title={title} style={{ width:isMobile?"44px":"30px",height:isMobile?"44px":"30px",display:"flex",alignItems:"center",justifyContent:"center",background:active?"#1E293B":"transparent",border:"1px solid #1E293B",borderRadius:"6px",color:disabled?"#1E293B":"#64748B",cursor:disabled?"not-allowed":"pointer",transition:"all 0.2s ease" }}
       onMouseEnter={(e)=>!disabled&&(e.currentTarget.style.color="#E2E8F0")} onMouseLeave={(e)=>!disabled&&(e.currentTarget.style.color="#64748B")}>
       {children}
     </button>
@@ -1025,18 +1030,45 @@ export default function Suimulate() {
             grid-template-rows: auto auto auto !important;
             overflow-y: auto !important;
           }
-          .panel-left { min-height: 400px; border-right: none !important; border-bottom: 1px solid #0F172A; }
-          .panel-center { min-height: 400px; }
-          .panel-right { min-height: 400px; border-left: none !important; border-top: 1px solid #0F172A; }
-          }  
+          .panel-left { min-height: 350px; border-right: none !important; border-bottom: 1px solid #0F172A; }
+          .panel-center { min-height: 350px; }
+          .panel-right { min-height: 350px; border-left: none !important; border-top: 1px solid #0F172A; }
+        }
+        @media (max-width: 480px) {
+          .state-panel-grid {
+            grid-template-columns: 1fr !important;
+          }
+          .gemini-key-panel {
+            width: 90% !important;
+            max-width: 400px !important;
+          }
+          .control-btn {
+            width: 44px !important;
+            height: 44px !important;
+          }
+          .section-label {
+            font-size: 11px !important;
+          }
+          .viz-container {
+            transform: scale(0.8);
+          }
+          .row-1 {
+            flex-direction: column !important;
+            align-items: flex-start !important;
+          }
+          .row-1 > div:last-child {
+            width: 100% !important;
+            justify-content: space-between !important;
+          }
         }
       `}</style>
 
       {showKeyPanel && <GeminiKeyPanel geminiKey={geminiKey} onSave={setGeminiKey} onClose={()=>setShowKeyPanel(false)} />}
 
       {/* HEADER */}
-      <header style={{ padding:"10px 12px",borderBottom:"1px solid #0F172A",display:"flex",alignItems:"center",gap:"12px",background:"rgba(7,13,26,0.96)",backdropFilter:"blur(12px)",position:"sticky",top:0,zIndex:100, }}>
-        <div className="row-1">
+      <header style={{ padding:"12px",borderBottom:"1px solid #0F172A",display:"flex",flexDirection:"column",gap:"12px",background:"rgba(7,13,26,0.96)",backdropFilter:"blur(12px)",position:"sticky",top:0,zIndex:100 }}>
+        {/* Row 1: Logo + Controls */}
+        <div className="row-1" style={{display: "flex", alignItems: "center", justifyContent: "space-between", gap: "12px", flexWrap: "wrap" }}>
           {/* Logo */}
           <div style={{ display:"flex",alignItems:"center",gap:"10px",flexShrink:0 }}>
             <div style={{ width:"32px",height:"32px",background:`linear-gradient(135deg, ${template.color}, ${template.color}80)`,borderRadius:"8px",display:"flex",alignItems:"center",justifyContent:"center",fontSize:"16px",boxShadow:`0 0 16px ${template.color}40`,transition:"all 0.4s ease" }}>◈</div>
@@ -1045,24 +1077,29 @@ export default function Suimulate() {
               <div style={{ color:"#475569",fontSize:"9px",letterSpacing:"0.08em",textTransform:"uppercase" }}>Move Visualizer · Sui Blockchain</div>
             </div>
           </div>
-           {/* Gemini key */}
-          <button onClick={()=>setShowKeyPanel(true)} style={{ display:"flex",alignItems:"center",gap:"6px",padding:"5px 11px",borderRadius:"20px",background:geminiKey?"rgba(99,102,241,0.15)":"transparent",border:`1px solid ${geminiKey?"#6366F160":"#1E293B"}`,color:geminiKey?"#818CF8":"#64748B",fontSize:"11px",fontWeight:600,cursor:"pointer",whiteSpace:"nowrap",flexShrink:0 }}>
-            {geminiKey?"✦ AI On":"✦ Add Gemini Key"}
-          </button>
-          {/* Speed */}
-          <div style={{ display:"flex",alignItems:"center",gap:"5px",flexShrink:0 }}>
-            <span style={{ color:"#475569",fontSize:"10px" }}>Speed</span>
-            <div style={{ display:"flex",background:"#0F172A",border:"1px solid #1E293B",borderRadius:"6px",overflow:"hidden" }}>
-              {[0.5,1,2].map((s)=>(
-                <button key={s} onClick={()=>setSpeed(s)} style={{ padding:"3px 7px",background:speed===s?"#1E293B":"transparent",color:speed===s?"#E2E8F0":"#475569",fontSize:"10px",fontWeight:700,border:"none",cursor:"pointer" }}>{s}×</button>
-              ))}
+
+          {/* Controls */}
+          <div style={{ display:"flex",alignItems:"center",gap:"8px",flexWrap:"wrap" }}>
+            {/* Gemini key */}
+            <button onClick={()=>setShowKeyPanel(true)} style={{ display:"flex",alignItems:"center",gap:"6px",padding:"5px 11px",borderRadius:"20px",background:geminiKey?"rgba(99,102,241,0.15)":"transparent",border:`1px solid ${geminiKey?"#6366F160":"#1E293B"}`,color:geminiKey?"#818CF8":"#64748B",fontSize:"11px",fontWeight:600,cursor:"pointer",whiteSpace:"nowrap",flexShrink:0 }}>
+              {geminiKey?"✦ AI On":"✦ Add Gemini Key"}
+            </button>
+            {/* Speed */}
+            <div style={{ display:"flex",alignItems:"center",gap:"5px",flexShrink:0 }}>
+              <span style={{ color:"#475569",fontSize:"10px" }}>Speed</span>
+              <div style={{ display:"flex",background:"#0F172A",border:"1px solid #1E293B",borderRadius:"6px",overflow:"hidden" }}>
+                {[0.5,1,2].map((s)=>(
+                  <button key={s} onClick={()=>setSpeed(s)} style={{ padding:"3px 7px",background:speed===s?"#1E293B":"transparent",color:speed===s?"#E2E8F0":"#475569",fontSize:"10px",fontWeight:700,border:"none",cursor:"pointer" }}>{s}×</button>
+                ))}
+              </div>
             </div>
           </div>
         </div>
 
-        <div className="row-2">
+        {/* Row 2: Templates */}
+        <div className="row-2" style={{ width: "100%" }}>
           {/* Templates */}
-          <div style={{ display:"flex",gap:"5px", overflowX: "auto", whiteSpace: "nowrap", width: "100%", paddingBotton: "4px", }}>
+          <div style={{ display:"flex",gap:"5px", overflowX: "auto", whiteSpace: "nowrap", width: "100%", paddingBottom: "4px", justifyContent: "center"}}>
             {Object.values(TEMPLATES).map((t)=>(
               <button key={t.id} onClick={()=>selectTemplate(t.id)} style={{ padding:"5px 11px",borderRadius:"20px",background:selectedTemplate===t.id?`${t.color}20`:"transparent",border:`1px solid ${selectedTemplate===t.id?t.color+"60":"#1E293B"}`,color:selectedTemplate===t.id?t.color:"#64748B",fontSize:"11px",fontWeight:selectedTemplate===t.id?700:500,cursor:"pointer",transition:"all 0.2s ease",whiteSpace:"nowrap" }}>
                 {t.icon} {t.label}
@@ -1089,7 +1126,7 @@ export default function Suimulate() {
       <div className="main-grid" style={{
         flex:1,
         display:"grid",
-        gridTemplateColumns:"minmax(280px, 320px) 1fr minmax(280px, 360px)",
+        gridTemplateColumns:"minmax(280px, 600px) minmax(430px, 1fr) minmax(280px, 600px)",
         gridTemplateRows:"1fr",
         gap:"1px",
         background:"#0F172A",
